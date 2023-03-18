@@ -19,7 +19,7 @@ class ProductController extends Controller
         if($productos->isEmpty()){
             return response()->json([
                 "status"=>"No elements in DB"
-            ],Response::HTTP_NO_CONTENT);
+            ],400);
         }else{
             return response()->json($productos,Response::HTTP_OK);
         }
@@ -28,9 +28,28 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+
+        try{
+            $jsonProduct = $request->json()->all();
+
+            $product = new Product($jsonProduct);
+
+            $product->save();
+
+            return response()->json([
+                'status'=>'accepted',
+                'product'=>$product
+            ],200);
+        }catch(\Illuminate\Database\QueryException $exception){
+            return response()->json([
+                'status'=>'rejected',
+                'message'=>$exception->errorInfo,
+            ],400);
+        }
+
+
     }
 
     /**
@@ -44,9 +63,18 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show(Request $request, $nombre)  //show por tipo
     {
-        //
+        $productos = Product::where('tipo',$nombre)->get();
+
+        if($productos->isEmpty()){
+            return response()->json([
+                "status"=>"Not Found"
+            ],400);
+        }else{
+            return response()->json($productos,Response::HTTP_OK);
+        }
+
     }
 
     /**
