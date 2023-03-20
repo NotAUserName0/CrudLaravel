@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use \Illuminate\Database\QueryException as QE;
 
 class ProductController extends Controller
 {
@@ -42,7 +43,7 @@ class ProductController extends Controller
                 'status'=>'accepted',
                 'product'=>$product
             ],200);
-        }catch(\Illuminate\Database\QueryException $exception){
+        }catch(QE $exception){
             return response()->json([
                 'status'=>'rejected',
                 'message'=>$exception->errorInfo,
@@ -80,9 +81,36 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
+    public function edit(Request $request, $id)
     {
-        //
+        try {
+
+            $jsonProduct = $request->json()->all();
+
+            if(!empty($jsonProduct)){
+
+                $productos = Product::where('id',$id)->update($request->only('nombre','tipo','cantidad'));
+
+                if ($productos == 1){
+                    return response()->json([
+                        'status'=>'accepted',
+                        'id'=>$id,
+                        'product'=>$productos
+                    ],200);
+                }else{
+                    return response()->json([
+                        'status'=>'rejected',
+                        'message'=> 'ID don´t exist, not all body in, or same info in',
+                    ],400);
+                }
+            }
+
+        } catch (QE $exception) {
+            return response()->json([
+                'status'=>'rejected',
+                'message'=>$exception->errorInfo,
+            ],400);
+        }
     }
 
     /**
@@ -96,8 +124,20 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy(Request $request, $id)
     {
-        //
+        try{
+            $productos = Product::where('id',$id)->delete();
+
+            return response()->json([
+                "status"=>"Deleted"
+            ],200);
+        }catch(QE $exception){
+            return response()->json([
+                'status'=>'Not Found',
+                'message'=>$exception->errorInfo,
+            ],400);
+        }
+
     }
 }

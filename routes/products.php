@@ -14,10 +14,6 @@ Route::get('/showat/{nombre}', 'App\Http\Controllers\ProductController@show'); /
 
 Route::post('/add', 'App\Http\Controllers\ProductController@create');
 
-Route::delete('/delete', function () {
-    return "welcome products";
-});
+Route::delete('/delete/{id}', 'App\Http\Controllers\ProductController@destroy');
 
-Route::put('/update', function () {
-    return "welcome products";
-});
+Route::put('/update/{id}', 'App\Http\Controllers\ProductController@edit');
